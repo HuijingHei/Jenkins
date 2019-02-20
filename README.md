@@ -1,2 +1,2 @@
-# Jenny
-Pipelines for Jenkins CI
+# Jenkins
+Pipeline Files for Jenkins CI
