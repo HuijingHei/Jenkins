@@ -15,7 +15,8 @@ pipeline {
                     }
                     steps {
                         powershell 'Get-ChildItem Env:'
-                        echo 'Checkout Code'
+                        echo 'Checkout 3rd-tools'
+                        checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'e75aa643-0716-4587-8262-a4b84c548f5f', url: 'ssh://xiaofwan@code.engineering.redhat.com:22/3rd-tools']]]
                         powershell '''
                             cd FileSwapper; cp conf.example.json conf.json; python CleanToolAdmin.py --config=conf.json --debug
                         '''
@@ -31,6 +32,8 @@ pipeline {
                     }
                     steps {
                         sh 'printenv'
+                        echo 'Checkout 3rd-tools'
+                        git branch: 'master', credentialsId: 'e75aa643-0716-4587-8262-a4b84c548f5f', url: 'ssh://xiaofwan@code.engineering.redhat.com:22/3rd-tools'
                         sh 'cd FileSwapper; cp conf.example.json conf.json; python3 CleanToolAdmin.py --config=conf.json --debug'
                         cleanWs()
                     }
