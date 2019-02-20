@@ -17,6 +17,12 @@ pipeline {
     }
 
     stages {
+        stage('Checkout 3rd-tools') {
+            steps {
+                git branch: 'master', credentialsId: 'e75aa643-0716-4587-8262-a4b84c548f5f', url: 'ssh://xiaofwan@code.engineering.redhat.com:22/3rd-tools'
+            }
+        }
+        
         stage('Hyper-V patch track') {
             environment {
                 sheetID="1LofiHUxC5_OU96qMHAWxvzzIiApG3IuzLfBiA_pHz4M"
@@ -25,9 +31,7 @@ pipeline {
                 rhel7_files="drivers/hv arch/x86/hyperv/ arch/x86/kernel/cpu/mshyperv.c drivers/hid/hid-hyperv.c drivers/input/serio/hyperv-keyboard.c drivers/pci/pci-hyperv.c drivers/net/hyperv/ drivers/scsi/storvsc_drv.c drivers/uio/uio_hv_generic.c drivers/video/hyperv_fb.c net/vmw_vsock/hyperv_transport.c"
             }
             steps {
-                sh 'printenv'
-                echo 'Checkout 3rd-tools'
-                git branch: 'master', credentialsId: 'e75aa643-0716-4587-8262-a4b84c548f5f', url: 'ssh://xiaofwan@code.engineering.redhat.com:22/3rd-tools'
+                sh 'printenv'              
                 sh 'cd patch_track/; python3 load_data_to_gs.py $cred_file $sheetID $shell_script $dir_repo $dir_log "$upstream_files" "$rhel7_files"' 
             }
         }
