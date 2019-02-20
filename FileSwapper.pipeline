@@ -1,0 +1,41 @@
+pipeline {
+    agent none
+    triggers {
+        cron('H 0 * * 1')
+    }
+    stages {        
+        stage('Remove files') {
+            parallel {
+                stage('Remove files on windows') {
+                    agent {
+                        node {
+                            label '3rd-CIVAN'
+                            customWorkspace "workspace/pipeline-FileSwapper-windows-${env.BUILD_ID}"
+                        }
+                    }
+                    steps {
+                        powershell 'Get-ChildItem Env:'
+                        echo 'Checkout Code'
+                        powershell '''
+                            cd FileSwapper; cp conf.example.json conf.json; python CleanToolAdmin.py --config=conf.json --debug
+                        '''
+                        cleanWs()
+                    }
+                }
+                stage('Remove files on Linux') {
+                    agent {
+                        node {
+                            label '3rd-CIBUS'
+                            customWorkspace "workspace/pipeline-FileSwapper-linux-${env.BUILD_ID}"
+                        }
+                    }
+                    steps {
+                        sh 'printenv'
+                        sh 'cd FileSwapper; cp conf.example.json conf.json; python3 CleanToolAdmin.py --config=conf.json --debug'
+                        cleanWs()
+                    }
+                }
+            } 
+        }
+    }
+}
