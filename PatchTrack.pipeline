@@ -1,0 +1,46 @@
+pipeline {
+    agent {
+        node {
+            label '3rd-CIBUS'
+            customWorkspace "workspace/pipeline-${env.BUILD_ID}"
+        }
+    }
+
+    environment {
+        cred_file="./cred.json"
+        shell_script="./patch_status.sh"
+        dir_repo="/upstream-kernel"
+    }
+
+    stages {
+        stage('Hyper-V patch track') {
+            environment {
+                sheetID="1LofiHUxC5_OU96qMHAWxvzzIiApG3IuzLfBiA_pHz4M"
+                dir_log="/opt/Hyper-V"
+                upstream_files="drivers/hv arch/x86/hyperv/ arch/x86/kernel/cpu/mshyperv.c drivers/hid/hid-hyperv.c drivers/input/serio/hyperv-keyboard.c drivers/pci/controller/pci-hyperv.c drivers/net/hyperv/ drivers/scsi/storvsc_drv.c drivers/uio/uio_hv_generic.c drivers/video/fbdev/hyperv_fb.c net/vmw_vsock/hyperv_transport.c"
+                rhel7_files="drivers/hv arch/x86/hyperv/ arch/x86/kernel/cpu/mshyperv.c drivers/hid/hid-hyperv.c drivers/input/serio/hyperv-keyboard.c drivers/pci/pci-hyperv.c drivers/net/hyperv/ drivers/scsi/storvsc_drv.c drivers/uio/uio_hv_generic.c drivers/video/hyperv_fb.c net/vmw_vsock/hyperv_transport.c"
+            }
+            steps {
+                sh 'printenv'
+                sh 'cd patch_track/; python3 load_data_to_gs.py $cred_file $sheetID $shell_script $dir_repo $dir_log "$upstream_files" "$rhel7_files"' 
+            }
+        }
+        
+        stage('ESXi patch track') {
+            environment {
+                sheetID="1deTinGSajnKGaL82LIgGznyVR4BTw8FSME5XSiMNhac"
+                dir_log="/opt/ESXi"
+                files="arch/x86/kernel/cpu/vmware.c drivers/net/vmxnet3/ drivers/scsi/vmw_pvscsi.c drivers/gpu/drm/vmwgfx/ drivers/misc/vmw_balloon.c"
+            }
+            steps {
+                sh 'printenv'
+                sh 'cd patch_track/; python3 load_data_to_gs.py $cred_file $sheetID $shell_script $dir_repo $dir_log "$files" "$files"'
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
