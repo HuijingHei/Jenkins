@@ -2,7 +2,7 @@ pipeline {
     agent {
         node {
             label '3rd-CIBUS'
-            customWorkspace "workspace/pipeline-${env.BUILD_ID}"
+            customWorkspace "workspace/pipeline-PatchTrack-${env.BUILD_ID}"
         }
     }
 
@@ -10,6 +10,10 @@ pipeline {
         cred_file="./cred.json"
         shell_script="./patch_status.sh"
         dir_repo="/upstream-kernel"
+    }
+
+    triggers {
+        cron('H 0 * * 1-5')
     }
 
     stages {
@@ -22,6 +26,8 @@ pipeline {
             }
             steps {
                 sh 'printenv'
+                echo 'Checkout 3rd-tools'
+                git branch: 'master', credentialsId: 'e75aa643-0716-4587-8262-a4b84c548f5f', url: 'ssh://xiaofwan@code.engineering.redhat.com:22/3rd-tools'
                 sh 'cd patch_track/; python3 load_data_to_gs.py $cred_file $sheetID $shell_script $dir_repo $dir_log "$upstream_files" "$rhel7_files"' 
             }
         }
