@@ -24,6 +24,9 @@ pipeline {
         }
         
         stage('Hyper-V patch track') {
+            options {
+                timeout(time: 40, unit: 'MINUTES')
+            }
             environment {
                 sheetID="1LofiHUxC5_OU96qMHAWxvzzIiApG3IuzLfBiA_pHz4M"
                 dir_log="/opt/Hyper-V"
@@ -37,6 +40,9 @@ pipeline {
         }
         
         stage('ESXi patch track') {
+            options {
+                timeout(time: 40, unit: 'MINUTES')
+            }
             environment {
                 sheetID="1deTinGSajnKGaL82LIgGznyVR4BTw8FSME5XSiMNhac"
                 dir_log="/opt/ESXi"
@@ -51,6 +57,11 @@ pipeline {
     post {
         always {
             cleanWs()
+        }
+        failure {
+            mail to: 'hhei@redhat.com',
+            subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+            body: "Something is wrong with ${env.BUILD_URL}"
         }
     }
 }
