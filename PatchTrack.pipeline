@@ -5,7 +5,9 @@ pipeline {
             customWorkspace "workspace/pipeline-PatchTrack-${env.BUILD_ID}"
         }
     }
-
+    options {
+        timeout(time: 60, unit: 'MINUTES')
+    }
     environment {
         cred_file="./cred.json"
         shell_script="./patch_status.sh"
@@ -51,6 +53,11 @@ pipeline {
     post {
         always {
             cleanWs()
+        }
+        failure {
+            mail to: 'hhei@redhat.com',
+            subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+            body: "Something is wrong with ${env.BUILD_URL}"
         }
     }
 }
