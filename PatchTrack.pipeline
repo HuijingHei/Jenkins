@@ -53,6 +53,9 @@ pipeline {
     post {
         always {
             cleanWs()
+            dir("${WORKSPACE}@tmp") {
+                deleteDir()
+            }
         }
         failure {
             mail to: 'hhei@redhat.com',
